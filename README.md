@@ -19,7 +19,7 @@ body:
 {
   "cep": "29709090"
 }
-```s
+```
 
 Link de acesso a telemetria do zipkin":
 
