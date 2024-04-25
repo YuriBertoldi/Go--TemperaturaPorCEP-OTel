@@ -66,8 +66,6 @@ func main() {
 }
 
 func handleRequest(w http.ResponseWriter, r *http.Request) {
-	// carrier := propagation.HeaderCarrier(r.Header)
-
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "invalid zipcode", http.StatusUnprocessableEntity)
@@ -92,7 +90,7 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 
 	temperature, status, err := getTemperature(cep.Cep, ctx)
 	if err != nil {
-		http.Error(w, "invalid zipcode", status)
+		http.Error(w, err.Error(), status)
 		return
 	}
 
@@ -104,18 +102,12 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(jsonData))
 }
 
-// Call service B
 func getTemperature(cep string, ctx context.Context) (*TemperatureResponse, int, error) {
 	_, span := otel.Tracer("service-a").Start(ctx, "request-service-b")
 	defer span.End()
 
-	req, err := http.NewRequestWithContext(ctx, "GET", "http://goapp-service-b:8081/"+cep, nil)
-	if err != nil {
-		return nil, http.StatusUnprocessableEntity, err
-	}
-
+	req, _ := http.NewRequestWithContext(ctx, "GET", "http://goapp-service-b:8081/"+cep, nil)
 	resp, err := http.DefaultClient.Do(req)
-
 	if err != nil {
 		return nil, http.StatusUnprocessableEntity, err
 	}
@@ -123,6 +115,10 @@ func getTemperature(cep string, ctx context.Context) (*TemperatureResponse, int,
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, http.StatusUnprocessableEntity, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, resp.StatusCode, fmt.Errorf(string(body))
 	}
 
 	var temperatureResponse TemperatureResponse
