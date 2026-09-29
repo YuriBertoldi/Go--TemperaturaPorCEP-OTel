@@ -23,7 +23,10 @@ Dois microsserviços em **Go** que recebem um CEP, descobrem a cidade e retornam
 
 ## 🚀 Como rodar
 
+Crie uma chave gratuita em [weatherapi.com](https://www.weatherapi.com/) e exporte antes de subir:
+
 ```bash
+export WEATHER_API_KEY=sua_chave
 docker compose up -d
 ```
 
