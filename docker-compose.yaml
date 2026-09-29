@@ -27,6 +27,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - '8081:8081'
+    environment:
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
     depends_on:
       - zipkin
     networks:
