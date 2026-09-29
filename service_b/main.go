@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
@@ -66,6 +67,10 @@ func initTracer() {
 func main() {
 	initTracer()
 
+	if os.Getenv("WEATHER_API_KEY") == "" {
+		log.Fatal("WEATHER_API_KEY environment variable is required")
+	}
+
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
@@ -123,7 +128,7 @@ func getAddressFromViaCEP(cep string, ctx context.Context) (*AddressResponse, er
 func getWeather(city string, ctx context.Context) (*WeatherResponse, error) {
 	_, span := otel.Tracer("service-b").Start(ctx, "get-weather")
 	defer span.End()
-	apiKey := "8887ae192b2343f9a32114928240104"
+	apiKey := os.Getenv("WEATHER_API_KEY")
 	returnNomeCidade := url.QueryEscape(city)
 	url := fmt.Sprintf("http://api.weatherapi.com/v1/current.json?key=%s&q=%s", apiKey, returnNomeCidade)
 
